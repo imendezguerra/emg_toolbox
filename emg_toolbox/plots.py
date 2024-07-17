@@ -13,7 +13,8 @@ def plot_ch(
     ax: Optional[plt.Axes] = None,
     palette_name: Optional[str] = "viridis",
     **kwarg: Optional[Union[str, int, float]]
-    ):
+    )-> plt.Axes:
+    
     """Plot data per channel in a single plot
 
     Args:

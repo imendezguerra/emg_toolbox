@@ -9,7 +9,8 @@ def replace_bad_ch(
     data: np.ndarray,
     bad_ch: Union[list, np.ndarray],
     ch_map: np.ndarray
-    ):
+    ) -> np.ndarray:
+    
     """Replace bad channels by the mean of the neighbours
 
     Args:
