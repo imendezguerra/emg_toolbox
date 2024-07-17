@@ -2,9 +2,8 @@
 
 from copy import copy
 import itertools
-from typing import Union, Tuple, Optional
+from typing import Union
 import numpy as np
-from scipy.interpolate import Akima1DInterpolator
 
 
 def arrange_data_spatially(
@@ -55,7 +54,7 @@ def flatten_data_spatially(
 
     samples = data.shape[-1]
     chs = np.amax(ch_map) + 1
-    
+
     data_flat = np.empty((samples, chs))
 
     for ch in range(chs):
@@ -110,7 +109,7 @@ def replace_bad_ch(
         [x, y] = np.where(ch_map == curr_bad_ch)
         x = x[0]
         y = y[0]
-        
+
         # # Define mask
         neigh_mask = np.array([
             [x, y + 1],
@@ -147,51 +146,3 @@ def replace_bad_ch(
             data_out[x,y] = np.mean( data_out[neigh_mask[:,0], neigh_mask[:,1]], axis=[1,2])
 
     return data_out
-
-
-def compute_rms(
-    data: np.ndarray,
-    timestamps: np.ndarray,
-    win_len_s: Optional[float] = 0.1,
-    win_step_s: Optional[float] = 0.1,
-    fs: Optional[int] = 2048
-    ) -> Tuple[np.ndarray, np.ndarray]:
-
-    """
-    Compute the Root Mean Square (RMS) of the data.
-
-    Args:
-        data (np.ndarray): The input data array of shape (samples, chs).
-        timestamps (np.ndarray): The timestamps array.
-        win_len_s (float, optional): The window length in seconds. Defaults to 0.1.
-        win_step_s (float, optional): The window step in seconds. Defaults to 0.1.
-        fs (int, optional): The sampling frequency. Defaults to 2048.
-
-    Returns:
-        Tuple[np.ndarray, np.ndarray]: The RMS array and the corresponding timestamps.
-    """
-
-    # Initialise variables
-    win_len = np.round( win_len_s * fs ).astype(int)
-    win_step = np.round( win_step_s * fs ).astype(int)
-
-    samples, chs = data.shape
-    win_num = np.round( (samples - win_len)/win_step ).astype(int) + 1
-
-    timestamps_aux = np.linspace( timestamps[0], timestamps[-1], win_num)
-    rms_aux = np.zeros((win_num, chs))
-
-    # Compute RMS
-    for win in range(win_num):
-        mask = np.arange(
-            0 + win_step * win,
-            np.amin([win_len + win_step * win, samples])
-            ).astype(int)
-        rms_aux[win] = np.sqrt(np.mean(data[mask]**2, axis=0))
-
-    # Interpolate RMS to match data signals
-    rms = np.zeros_like(data)
-    for ch in range(chs):
-        rms[:, ch] = Akima1DInterpolator(timestamps_aux, rms_aux[:, ch])(timestamps)
-
-    return rms, timestamps_aux
