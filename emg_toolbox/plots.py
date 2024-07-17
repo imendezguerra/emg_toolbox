@@ -7,6 +7,7 @@ from scipy import fft, signal
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+
 def plot_ch(
     data: np.ndarray,
     timestamps: np.ndarray,
@@ -15,7 +16,7 @@ def plot_ch(
     palette_name: Optional[str] = "viridis",
     **kwarg: Optional[Union[str, int, float]]
     )-> plt.Axes:
-    
+
     """Plot data per channel in a single plot
 
     Args:
@@ -70,7 +71,7 @@ def plot_psd(
     fs: Optional[int] = 2048,
     ax: Optional[plt.Axes] = None,
 ) -> plt.Axes:
-    
+
     """Plot the Power Spectral Density (PSD) of the input data.
 
     Args:
@@ -95,15 +96,16 @@ def plot_psd(
     ax.plot(xf, 2/samples * np.abs(yf[0:samples//2]))
     ax.set_xlabel('Frequency (Hz)')
     ax.set_ylabel('PSD')
-    
+
     return ax
+
 
 def plot_spectrogram(
     data: np.ndarray,
     fs: Optional[int] = 2048,
     ax: Optional[plt.Axes] = None,        
 ) -> plt.Axes:
-    
+
     """Plot the spectrogram of the input data.
 
     Args:
@@ -116,13 +118,13 @@ def plot_spectrogram(
     """
 
     # Compute spectrogram (one sided)
-    f, t, Sxx = signal.spectrogram(data, fs)
+    f, t, sxx = signal.spectrogram(data, fs)
 
     # Plot spectrogram
     if ax is None:
         _, ax = plt.subplots(1, 1, figsize=(10,5), layout='tight')
-    ax.pcolormesh(t, f, Sxx, shading='gouraud')
+    ax.pcolormesh(t, f, sxx, shading='gouraud')
     ax.set_ylabel('Frequency [Hz]')
     ax.set_xlabel('Time [sec]')
-    
+
     return ax
