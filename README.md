@@ -57,7 +57,11 @@ To set up the project locally do the following:
 
 ## Quick start 
 The package is composed of the following modules:
-
+- `tools.py`: Functions to deal with bad channels and rearrange EMG signals.
+- `prepro.py`: Functions for EMG preprocessing such as filtering.
+- `feats.py`: Functions to extract EMG features.
+- `freq.py`: Functions to analyse the EMG signals in the frequency domain.
+- `plots.py`: Functions to plot EMG signals
 
 ## Contributing
 We welcome contributions! Here’s how you can contribute:
