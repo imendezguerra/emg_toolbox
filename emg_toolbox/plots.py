@@ -115,7 +115,7 @@ def plot_spectrogram(
         plt.Axes: Axes where the spectrogram is plotted.
     """
 
-    # Compute spectrogram
+    # Compute spectrogram (one sided)
     f, t, Sxx = signal.spectrogram(data, fs)
 
     # Plot spectrogram
