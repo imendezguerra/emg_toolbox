@@ -3,6 +3,7 @@
 from copy import copy
 from typing import Optional, Union
 import numpy as np
+from scipy import fft
 import seaborn as sns
 import matplotlib.pyplot as plt
 
@@ -61,4 +62,38 @@ def plot_ch(
     sel_chs = np.arange(0, chs, 5)
     ax.set_yticks(ch_ticks[sel_chs], sel_chs)
 
+    return ax
+
+
+def plot_psd(
+    data: np.ndarray,
+    fs: Optional[int] = 2048,
+    ax: Optional[plt.Axes] = None,
+) -> plt.Axes:
+    
+    """Plot the Power Spectral Density (PSD) of the input data.
+
+    Args:
+        data (np.ndarray): The input data.
+        fs (int, optional): The sampling frequency. Default is 2048.
+        ax (plt.Axes, optional): The axes to plot the PSD. Default is None.
+
+    Returns:
+        plt.Axes: The axes where the PSD is plotted.
+    """
+
+    # Initialise variables
+    samples = data.shape[0]
+
+    # Compute PSD
+    yf = fft.fft(data, axis=0)
+    xf = fft.fftfreq(samples, 1/fs)[:samples//2]
+
+    # Plot PSD
+    if ax is None:
+        _, ax = plt.subplots(1, 1, figsize=(10,5), layout='tight')
+    ax.plot(xf, 2/samples * np.abs(yf[0:samples//2]))
+    ax.set_xlabel('Frequency (Hz)')
+    ax.set_ylabel('PSD')
+    
     return ax
