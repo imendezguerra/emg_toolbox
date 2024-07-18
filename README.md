@@ -9,7 +9,6 @@ This repository contains functions to analyse electromyography (EMG) signals.
 - [Contributing](#contributing)
 - [License](#license)
 - [Citation](#citation)
-- [Acknowledgments](#acknowledgments)
 - [Contact](#contact)
 
 ## Installation 
