@@ -24,14 +24,13 @@ def arrange_data_spatially(
 
     rows, cols = ch_map.shape
     samples, chs = data.shape
-    data_spatial = np.empty((rows, cols, samples))
+    data_spatial = np.zeros((rows, cols, samples))
 
-    for row, col in itertools.product(range(rows), range(cols)):
+    for row, col in np.ndindex(ch_map.shape):
         ch = ch_map[row, col]
         if (ch < 0) or (ch >= chs):
-            data_spatial[row, col] = np.zeros(samples)
-        else:
-            data_spatial[row, col] = data[:, ch]
+            continue
+        data_spatial[row, col] = data[:, ch]
 
     return data_spatial
 
