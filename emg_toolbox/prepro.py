@@ -104,7 +104,7 @@ def lowpass_filter(
 
     """
     # Define filter
-    sos = signal.butter(order, cutoff, btype='high', fs=fs, output='sos')
+    sos = signal.butter(order, cutoff, btype='low', fs=fs, output='sos')
 
     # Apply filter
     if filtfilt:
