@@ -3,10 +3,11 @@
 from copy import copy
 from typing import Optional, Union
 import numpy as np
-from scipy import fft, signal
+from scipy import signal
 import seaborn as sns
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
+from emg_toolbox.freq import get_psd
 
 
 def plot_ch(
@@ -94,11 +95,7 @@ def plot_psd(
     """
 
     # Initialise variables
-    samples, chs = data.shape
-
-    # Compute PSD
-    yf = fft.fft(data, axis=0)
-    xf = fft.fftfreq(samples, 1/fs)[:samples//2]
+    chs = data.shape[1]
 
     # Define axis if None
     if ax is None:
@@ -109,7 +106,8 @@ def plot_psd(
     ax.set_prop_cycle(color=color_palette)
 
     # Plot PSD
-    psd = 2/samples * np.abs(yf[0:samples//2])
+    psd, xf = get_psd(data, fs)
+
     if log_scale:
         ax.semilogy(xf, psd, **kwarg)
         ax.set_ylabel('PSD (dB/Hz)')
@@ -153,10 +151,8 @@ def plot_psd_map(
     # Initialise variables
     samples, chs = data.shape
 
-    # Compute PSD
-    yf = fft.fft(data, axis=0)
-    xf = fft.fftfreq(samples, 1/fs)[:samples//2]
-    psd = 2/samples * np.abs(yf[0:samples//2])
+    # Plot PSD
+    psd, xf = get_psd(data, fs)
 
     # Plot PSD
     if ax is None:
