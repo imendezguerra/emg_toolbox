@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "emg_toolbox"
+version = "1.0"
+description = "emg_toolbox is a package to analyse EMG signals"
+authors = [
+    {name = "Irene Mendez Guerra"}
+]
+license = { file = "LICENSE" }
+readme = "README.md"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License"
+]
+requires-python = ">=3.8"
+depenencies = [
+    "numpy",
+    "scipy",
+    "matplotlib",
+    "seaborn"
+]
+
