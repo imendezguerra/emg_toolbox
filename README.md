@@ -11,30 +11,8 @@ This repository contains functions to analyse electromyography (EMG) signals.
 - [Citation](#citation)
 - [Contact](#contact)
 
-## Installation 
-This toolbox is installable via pip with:
-```sh
-pip install git+https://github.com/imendezguerra/emg_toolbox
-```
 
-To install it in editable mode, please clone the repository in your project's folder and run:
-```sh
-pip install -e ./emg_toolbox
-```
-Once the toolbox has been installed you can just import the corresponding packages as:
-```python
-from emg_toolbox import plots
-```
-#### Prerequisites
-When installing the package, `pip` will automatically install the required packages stored in `requirements.txt`. 
-
-If you decide to clone the repository, then you can replicate the environment with:
-```
-conda env create -f environment.yml
-```
-The file was constructed without the build so it should be compatible with Os, Windows, and Linux.
-
-#### Local setup guide
+#### Installation
 To set up the project locally do the following:
 
 1. Clone the repository:
@@ -52,6 +30,10 @@ To set up the project locally do the following:
 4. Activate the environment:
     ```sh
     conda activate emg_toolbox
+    ```
+5. Install toolbox
+    ```
+    pip install -e .
     ```
 
 ## Quick start 
