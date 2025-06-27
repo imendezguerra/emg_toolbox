@@ -1,7 +1,6 @@
 """Tools for EMG data processing"""
 
 from copy import copy
-import itertools
 from typing import Union
 import numpy as np
 
