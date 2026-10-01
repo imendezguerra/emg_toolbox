@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "emg_toolbox"
-version = "1.0"
+version = "1.1.0"
 description = "emg_toolbox is a package to analyse EMG signals"
 authors = [
     {name = "Irene Mendez Guerra"}
