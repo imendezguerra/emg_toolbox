@@ -1,6 +1,7 @@
 """Preprocessing of EMG signals"""
 
 from typing import Optional
+
 import numpy as np
 from scipy import signal
 
@@ -17,7 +18,7 @@ def bandpass_filter(
     Apply a bandpass filter to the input data.
 
     Parameters:
-        data (np.ndarray): The input data to be filtered.
+        data (np.ndarray): The input data to be filtered with shape (samples, chs).
         fs (Optional[int]): The sampling frequency of the data. Default is 2048.
         cutoff (Optional[list]): List with the cutoff frequencies of the filter.
             Default is [20, 500].
@@ -38,9 +39,9 @@ def bandpass_filter(
 
     # Apply filter
     if filtfilt:
-        out = signal.sosfiltfilt(sos, data)
+        out = signal.sosfiltfilt(sos, data, axis=0)
     else:
-        out = signal.sosfilt(sos, data)
+        out = signal.sosfilt(sos, data, axis=0)
 
     return out
 
@@ -57,9 +58,9 @@ def highpass_filter(
     Apply a highpass filter to the input data.
 
     Parameters:
-        data (np.ndarray): The input data to be filtered.
+        data (np.ndarray): The input data to be filtered with shape (samples, chs).
         fs (Optional[int]): The sampling frequency of the data. Default is 2048.
-        cutoff (Optional[list]): High cutoff frequency of the filter. Default is 20.
+        cutoff (Optional[float]): Cutoff frequency of the filter. Default is 20.
         order (Optional[int]): The order of the filter. Default is 2.
         filtfilt (Optional[bool]): Whether to use forward-backward filtering.
             Default is True.
@@ -73,9 +74,9 @@ def highpass_filter(
 
     # Apply filter
     if filtfilt:
-        out = signal.sosfiltfilt(sos, data)
+        out = signal.sosfiltfilt(sos, data, axis=0)
     else:
-        out = signal.sosfilt(sos, data)
+        out = signal.sosfilt(sos, data, axis=0)
 
     return out
 
@@ -92,10 +93,10 @@ def lowpass_filter(
     Apply a lowpass filter to the input data.
 
     Parameters:
-        data (np.ndarray): The input data to be filtered.
+        data (np.ndarray): The input data to be filtered with shape (samples, chs).
         fs (Optional[int]): The sampling frequency of the data. Default is 2048.
-        cutoff (Optional[list]): Low cutoff frequency of the filter. Default is 20.
-        order (Optional[int]): The order of the filter. Default is 4.
+        cutoff (Optional[float]): Cutoff frequency of the filter. Default is 500.
+        order (Optional[int]): The order of the filter. Default is 2.
         filtfilt (Optional[bool]): Whether to use forward-backward filtering.
             Default is True.
 
@@ -108,13 +109,13 @@ def lowpass_filter(
 
     # Apply filter
     if filtfilt:
-        out = signal.sosfiltfilt(sos, data)
+        out = signal.sosfiltfilt(sos, data, axis=0)
     else:
-        out = signal.sosfilt(sos, data)
+        out = signal.sosfilt(sos, data, axis=0)
 
     return out
 
- 
+
 def remove_powerline(
     data: np.ndarray,
     fs: Optional[int] = 2048,
@@ -128,11 +129,11 @@ def remove_powerline(
     Remove powerline noise from the input data.
 
     Parameters:
-        data (np.ndarray): The input data to be filtered.
+        data (np.ndarray): The input data to be filtered with shape (samples, chs).
         fs (Optional[int]): The sampling frequency of the data. Default is 2048.
-        cutoff (Optional[list]): Cutoff frequency of the filter. Default is 50.
-        width (Optional[float]): Width of the filter. Default is 1. 
-        order (Optional[int]): The order of the filter. Default is 4.
+        cutoff (Optional[float]): Cutoff frequency of the filter. Default is 50.
+        width (Optional[float]): Width of the filter. Default is 1.
+        order (Optional[int]): The order of the filter. Default is 2.
         filtfilt (Optional[bool]): Whether to use forward-backward filtering.
             Default is True.
 
@@ -149,8 +150,8 @@ def remove_powerline(
 
     # Apply filter
     if filtfilt:
-        out = signal.sosfiltfilt(sos, data)
+        out = signal.sosfiltfilt(sos, data, axis=0)
     else:
-        out = signal.sosfilt(sos, data)
+        out = signal.sosfilt(sos, data, axis=0)
 
     return out

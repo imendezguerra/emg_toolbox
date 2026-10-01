@@ -1,0 +1,9 @@
+# Lowest supported dependency versions, tested in CI (minimum-deps job).
+# Keep in sync with the lower bounds in pyproject.toml [project.dependencies].
+numpy==1.22.4
+scipy==1.8.1
+matplotlib==3.5.3
+seaborn==0.11.2
+# Transitive pins contemporary with the versions above
+pandas==1.4.4
+pyparsing==3.0.9

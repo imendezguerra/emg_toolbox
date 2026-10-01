@@ -5,5 +5,5 @@ dependencies:
   - python>=3.8
   - numpy
   - scipy
-  - matplotlib
+  - matplotlib>=3.5
   - seaborn
