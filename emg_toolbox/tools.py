@@ -2,6 +2,7 @@
 
 from copy import copy
 from typing import Union
+
 import numpy as np
 
 
@@ -53,7 +54,7 @@ def flatten_data_spatially(
     samples = data.shape[-1]
     chs = np.amax(ch_map) + 1
 
-    data_flat = np.empty((samples, chs))
+    data_flat = np.zeros((samples, chs))
 
     for ch in range(chs):
         idx = np.where(ch_map == ch)
@@ -70,12 +71,13 @@ def replace_bad_ch(
     ) -> np.ndarray:
 
     """
-    Replace bad channels with the mean of their neighboring channels.
+    Replace bad channels with the mean of their neighboring channels. Bad
+    channels without good neighbours are set to zero.
 
     Args:
-        data (np.ndarray): Data with shape (samples, channels) or 
+        data (np.ndarray): Data with shape (samples, channels) or
             (ch_rows, ch_cols, samples).
-        bad_ch (Union[list, np.ndarray]): A list or numpy array containing the 
+        bad_ch (Union[list, np.ndarray]): A list or numpy array containing the
             indices of the bad channels.
         ch_map (np.ndarray): A 2D numpy array representing the channel map.
 
@@ -93,7 +95,7 @@ def replace_bad_ch(
         bad_ch_out = copy(bad_ch).tolist()
 
     # Substitute bad channels until there are no more bad channels left
-    while np.any(bad_ch_out):
+    while len(bad_ch_out) > 0:
 
         # Set updated bad channels to -1
         ch_map_out = copy(ch_map)
@@ -137,10 +139,16 @@ def replace_bad_ch(
         neigh_mask = neigh_mask[in_range, :]
         neigh_chs = ch_map[neigh_mask[:,0], neigh_mask[:,1]]
 
-        # Substitue channels
+        # Substitue channels (set to zero if there are no good neighbours)
         if len(data_out.shape) == 2: # (samples, chs) format
-            data_out[:, curr_bad_ch] = np.mean( data_out[:, neigh_chs], axis=-1)
+            if len(neigh_chs) == 0:
+                data_out[:, curr_bad_ch] = 0
+            else:
+                data_out[:, curr_bad_ch] = np.mean( data_out[:, neigh_chs], axis=-1)
         elif len(data_out.shape) == 3: # (ch_rows, ch_cols, samples) format
-            data_out[x,y] = np.mean( data_out[neigh_mask[:,0], neigh_mask[:,1]], axis=[1,2])
+            if len(neigh_chs) == 0:
+                data_out[x,y] = 0
+            else:
+                data_out[x,y] = np.mean( data_out[neigh_mask[:,0], neigh_mask[:,1]], axis=0)
 
     return data_out

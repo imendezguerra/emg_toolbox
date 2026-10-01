@@ -1,6 +1,6 @@
 # EMG Toolbox
 
-## Overview 
+## Overview
 This repository contains functions to analyse electromyography (EMG) signals.
 
 ## Table of Contents
@@ -36,13 +36,21 @@ To set up the project locally do the following:
     pip install -e .
     ```
 
-## Quick start 
+## Quick start
 The package is composed of the following modules:
 - `tools.py`: Functions to deal with bad channels and rearrange EMG signals.
 - `prepro.py`: Functions for EMG preprocessing such as filtering.
 - `feats.py`: Functions to extract EMG features.
 - `freq.py`: Functions to analyse the EMG signals in the frequency domain.
 - `plots.py`: Functions to plot EMG signals
+
+### Data format
+All functions follow the same conventions:
+- EMG data is a `numpy` array with shape `(samples, channels)`, i.e. time along `axis=0`.
+- Spatial (grid) data has shape `(rows, cols, samples)`. Use `arrange_data_spatially` and `flatten_data_spatially` in `tools.py` to convert between both formats.
+- The channel map `ch_map` is an integer array of shape `(rows, cols)` holding the 0-based channel index of each electrode. Empty grid positions are marked with `-1`.
+- Bad channels are given as a list of 0-based channel indices.
+- The sampling frequency `fs` is in Hz (default `2048`).
 
 ## Contributing
 We welcome contributions! Here’s how you can contribute:

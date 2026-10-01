@@ -2,12 +2,20 @@
 
 from copy import copy
 from typing import Optional, Union
-import numpy as np
-from scipy import signal
-import seaborn as sns
-import matplotlib.pyplot as plt
+
 import matplotlib.colors as colors
+import matplotlib.pyplot as plt
+import numpy as np
+import seaborn as sns
+from scipy import signal
+
 from emg_toolbox.freq import get_psd
+
+
+def _min_positive(x: np.ndarray) -> float:
+    """Smallest strictly positive value of x, used as default log-scale vmin"""
+    positive = x[x > 0]
+    return positive.min() if positive.size else np.finfo(float).tiny
 
 
 def plot_ch(
@@ -22,7 +30,7 @@ def plot_ch(
     """Plot data per channel in a single plot
 
     Args:
-        data (np.ndarray): Data to be displayed. It should have shape 
+        data (np.ndarray): Float data to be displayed. It should have shape
             (samples, channels).
         timestamps (np.ndarray): Data timestamps. It should have shape (samples,).
         delta (int, optional): Gain applied to the maximum of the data to modulate
@@ -110,7 +118,7 @@ def plot_psd(
 
     if log_scale:
         ax.semilogy(xf, psd, **kwarg)
-        ax.set_ylabel('PSD (dB/Hz)')
+        ax.set_ylabel('PSD (mV^2/Hz)')
     else:
         ax.plot(xf, psd, **kwarg)
         ax.set_ylabel('PSD (mV^2/Hz)')
@@ -129,7 +137,7 @@ def plot_psd_map(
 ) -> plt.Axes:
 
     """Plot the Power Spectral Density (PSD) of the input data as a heatmap across
-    channels.  
+    channels.
 
     Args:
         data (np.ndarray): Input data with shape (samples, channels).
@@ -138,11 +146,11 @@ def plot_psd_map(
         log_scale (bool, optional): If True, the PSD is plotted in log scale. Default
             is False.
         eps (float, optional): Small value to avoid log(0) when plotting in log scale.
-            Default is None.
+            Default is None, which uses the smallest positive value.
         palette_name (str, optional): Name of the seaborn palette used for plotting.
             Default is "viridis".
-        **kwarg: Additional keyword arguments to be passed to the `plot` function of
-            matplotlib.
+        **kwarg: Additional keyword arguments to be passed to the `pcolormesh`
+            function of matplotlib.
 
     Returns:
         plt.Axes: Axes where the PSD is plotted.
@@ -158,14 +166,15 @@ def plot_psd_map(
     if ax is None:
         _, ax = plt.subplots(1, 1, figsize=(10,5), layout='tight')
     if log_scale:
-        if eps is None: eps = psd.min()
+        if eps is None:
+            eps = _min_positive(psd)
         norm=colors.LogNorm(vmin=eps, vmax=psd.max())
-        cbar_label = 'PSD (dB/Hz)'
+        cbar_label = 'PSD (mV^2/Hz)'
     else:
         norm=None
         cbar_label = 'PSD (mV^2/Hz)'
     im = ax.pcolormesh(
-        np.arange(chs), xf, psd, 
+        np.arange(chs), xf, psd,
         shading='gouraud', cmap=palette_name, norm=norm,
         **kwarg
         )
@@ -181,70 +190,54 @@ def plot_psd_map(
 def plot_comp_spectrogram(
     data: np.ndarray,
     fs: Optional[int] = 2048,
-    ax: Optional[plt.Axes] = None, 
+    ax: Optional[Union[plt.Axes, np.ndarray]] = None,
     log_scale: Optional[bool] = False,
     eps: Optional[float] = None,
     palette_name: Optional[str] = "viridis",
-    **kwarg: Optional[Union[str, int, float]]   
-) -> plt.Axes:
+    **kwarg: Optional[Union[str, int, float]]
+) -> np.ndarray:
 
     """Compute and plot the spectrogram of the input data.
 
     Args:
-        data (np.ndarray): Input data with shape (samples, channels).
+        data (np.ndarray): Input data with shape (samples, channels) or (samples,).
         fs (int, optional): Sampling frequency. Default is 2048.
-        ax (plt.Axes, optional): Axes to plot the spectrogram. Default is None.
+        ax (plt.Axes or np.ndarray, optional): Axes to plot the spectrogram, one
+            per channel. Default is None.
         log_scale (bool, optional): If True, the PSD is plotted in log scale. Default
             is False.
         eps (float, optional): Small value to avoid log(0) when plotting in log scale.
-            Default is None.
+            Default is None, which uses the smallest positive value.
         palette_name (str, optional): Name of the seaborn palette used for plotting.
             Default is "viridis".
-        **kwarg: Additional keyword arguments to be passed to the `pcolormesh` 
+        **kwarg: Additional keyword arguments to be passed to the `pcolormesh`
             function of matplotlib.
     Returns:
-        plt.Axes: Axes where the spectrogram is plotted.
+        np.ndarray: Array of axes where the spectrogram of each channel is plotted.
     """
 
-    # Compute spectrogram (one sided)
-    f, t, sxx = signal.spectrogram(data, fs)
+    # Compute spectrogram (one sided) with shape (freqs, chs, times)
+    f, t, sxx = signal.spectrogram(data, fs, axis=0)
 
-    # Define axis if None
-    if ax is None:
-        _, ax = plt.subplots(1, 1, figsize=(10,5), layout='tight')
+    # Rearrange to (freqs, times, chs)
+    if sxx.ndim == 3:
+        sxx = np.moveaxis(sxx, 1, -1)
 
-    # Normalise spectrogram if log scale
-    if log_scale:
-        if eps is None: eps = sxx.min()
-        norm=colors.LogNorm(vmin=eps, vmax=sxx.max())
-        cbar_label = 'PSD (dB/Hz)'
-    else:
-        norm=None
-        cbar_label = 'PSD (mV^2/Hz)'
-
-    # Plot spectrogram
-    im = ax.pcolormesh(
-        t, f, sxx,
-        shading='gouraud', cmap=palette_name, norm=norm,
-        **kwarg
+    return plot_spectrogram(
+        f, t, sxx, ax=ax, palette_name=palette_name,
+        log_scale=log_scale, eps=eps, **kwarg
     )
-    cbar = ax.figure.colorbar(im, ax=ax)
-    cbar.set_label(cbar_label, rotation=90)
-    ax.set_ylabel('Frequency (Hz)')
-    ax.set_xlabel('Time (s)')
-
-    return ax
 
 def plot_spectrogram(
     f: np.ndarray,
     t: np.ndarray,
-    sxx: np.ndarray, 
-    ax: Optional[plt.Axes] = None,
+    sxx: np.ndarray,
+    ax: Optional[Union[plt.Axes, np.ndarray]] = None,
     palette_name: Optional[str] = "magma",
     log_scale: Optional[bool] = False,
     eps: Optional[float] = None,
-    **kwarg: Optional[Union[str, int, float]]   
-) -> plt.Axes:
+    **kwarg: Optional[Union[str, int, float]]
+) -> np.ndarray:
 
     """Plot the input spectrogram.
 
@@ -253,28 +246,29 @@ def plot_spectrogram(
         t (np.ndarray): Timestamps of the spectrogram.
         sxx (np.ndarray): Spectrogram of one or more signals with shape
             (frequencies, timestamps, signals).
-        ax (plt.Axes, optional): Axes to plot the spectrogram. Default is None.
-        norm (bool, optional): If True, the PSD is plotted in log scale. Default
-            is False.
+        ax (plt.Axes or np.ndarray, optional): Axes to plot the spectrogram, one
+            per signal. Default is None.
         palette_name (str, optional): Name of the seaborn palette used for plotting.
             Default is "magma".
         log_scale (bool, optional): If True, the PSD is plotted in log scale. Default
             is False.
         eps (float, optional): Small value to avoid log(0) when plotting in log scale.
-            Default is None.
-        **kwarg: Additional keyword arguments to be passed to the `pcolormesh` 
+            Default is None, which uses the smallest positive value.
+        **kwarg: Additional keyword arguments to be passed to the `pcolormesh`
             function of matplotlib.
     Returns:
-        plt.Axes: Axes where the spectrogram is plotted.
+        np.ndarray: Array of axes where the spectrogram of each signal is plotted.
     """
 
     # Normalise spectrogram if log scale
-    if eps is None:
-        eps = sxx.min()
     if log_scale:
+        if eps is None:
+            eps = _min_positive(sxx)
         norm=colors.LogNorm(vmin=eps, vmax=sxx.max())
-        cbar_label = 'PSD (dB/Hz)'
+        cbar_label = 'PSD (mV^2/Hz)'
     else:
+        if eps is None:
+            eps = sxx.min()
         norm=colors.Normalize(vmin=eps, vmax=sxx.max())
         cbar_label = 'PSD (mV^2/Hz)'
 
@@ -289,15 +283,16 @@ def plot_spectrogram(
 
         fig, ax = plt.subplots(
             rows, cols, figsize=(12, 6),
-            sharex=True, sharey=True, layout='constrained'
-        ) 
-        ax = ax.flatten()
+            sharex=True, sharey=True, layout='constrained', squeeze=False
+        )
+    ax = np.atleast_1d(ax).flatten()
 
     for i in range(nsig):
         # Plot spectrogram
         im = ax[i].pcolormesh(
             t, f, sxx[:,:,i],
             shading='gouraud', cmap=palette_name, norm=norm,
+            **kwarg
         )
         cbar = ax[i].figure.colorbar(im, ax=ax[i])
         cbar.set_label(cbar_label, rotation=90)
