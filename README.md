@@ -1,5 +1,7 @@
 # EMG Toolbox
 
+[![CI](https://github.com/imendezguerra/emg_toolbox/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/imendezguerra/emg_toolbox/actions/workflows/ci.yml)
+
 ## Overview
 This repository contains functions to analyse electromyography (EMG) signals.
 
